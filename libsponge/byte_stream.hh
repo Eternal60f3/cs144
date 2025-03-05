@@ -12,12 +12,12 @@
 //! and then no more bytes can be written.
 class ByteStream {
   private:
-    std::deque<char> container_{};     //!< The queue to store the bytes.
+    std::deque<char> container_{};   //!< The queue to store the bytes.
     size_t capacity_;                //!< The maximum capacity of the stream.
     bool end_input_flag_{false};     //!< Flag indicating that the input has ended.
     bool error_{false};              //!< Flag indicating that the stream suffered an error.
     size_t total_bytes_written_{0};  //!< Total number of bytes written.
-    size_t total_bytes_pop_{0};     //!< Total number of bytes read.
+    size_t total_bytes_pop_{0};      //!< Total number of bytes read.
 
   public:
     //! Construct a stream with room for `capacity` bytes.
