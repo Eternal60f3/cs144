@@ -81,7 +81,7 @@ class BufferList {
 
     //! \brief Transform to a Buffer
     //! \note Throws an exception unless BufferList is contiguous
-    operator Buffer() const;
+    operator Buffer() const; // \explain: 解释该函数的作用
 
     //! \brief Discard the first `n` bytes of the string (does not require a copy or move)
     void remove_prefix(size_t n);

@@ -9,15 +9,12 @@
 
 // \brief A class that assembles a series of excerpts from a byte stream (possibly out of order,
 // possibly overlapping) into an in-order byte stream.
-//! \WARNING real_capacity = self_Reassembler.capacity + output.capacity,
-//! i.e., 2 * (the capacity parameter passed during construction)
 class StreamReassembler {
   private:
     std::deque<char> container_;         //!< The queue to store the bytes.
     std::deque<bool> mask_;              //!< Indicates whether the current absolute index has data
     ByteStream output_;                  //!< The reassembled in-order byte stream
-    size_t self_capacity_;               //!< The maximum number of bytes
-    size_t self_remaining_capacity_;     //!< The remaining capacity of the reassembler
+    size_t capacity_;                    //!< The maximum number of bytes
     size_t first_unassembled_idx_{0};    //!< The index of the first byte that has not been reassembled
     size_t total_unassembled_bytes_{0};  //!< The total number of bytes that have not been reassembled
     bool has_eof_{false};                //!< Indicates whether the last byte of the entire stream has been received
@@ -49,6 +46,12 @@ class StreamReassembler {
     //! \note If the byte at a particular index has been pushed more than once, it
     //! should only be counted once for the purpose of this function.
     size_t unassembled_bytes() const;
+
+    //! \brief The index of the first byte that has not been reassembled
+    size_t first_unassembled_index() const { return first_unassembled_idx_; }
+
+    //! \brief The number of bytes that can be accepted by the reassembler
+    size_t remaining_capacity() const { return capacity_ - output_.buffer_size(); }
 
     //! \brief Is the internal state empty (other than the output stream)?
     //! \returns `true` if no substrings are waiting to be assembled

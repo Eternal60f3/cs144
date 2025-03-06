@@ -18,8 +18,7 @@ StreamReassembler::StreamReassembler(const size_t capacity)
     : container_(capacity, 0)
     , mask_(capacity, false)
     , output_(capacity)
-    , self_capacity_(capacity)
-    , self_remaining_capacity_(capacity) {}
+    , capacity_(capacity) {}
 
 // \brief This function accepts a substring (aka a segment) of bytes,
 // possibly out-of-order, from the logical stream, and assembles any newly
@@ -40,7 +39,7 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     size_t container_offset = data_index - first_unassembled_idx_;
 
     for (; data_offset < data.size(); ++data_offset, ++container_offset) {
-        if (container_offset >= self_capacity_) {
+        if (container_offset >= capacity_) {
             break;
         }
         if (mask_[container_offset]) {
@@ -49,7 +48,6 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 
         container_[container_offset] = data[data_offset];
         mask_[container_offset] = true;
-        --self_remaining_capacity_;
         ++total_unassembled_bytes_;
     }
     // @}
@@ -69,7 +67,6 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
     }
     output_.write(tmp);
     first_unassembled_idx_ += i;
-    self_remaining_capacity_ += i;
     total_unassembled_bytes_ -= i;
     // @}
 
@@ -83,4 +80,4 @@ void StreamReassembler::push_substring(const string &data, const size_t index, c
 
 size_t StreamReassembler::unassembled_bytes() const { return total_unassembled_bytes_; }
 
-bool StreamReassembler::empty() const { return self_remaining_capacity_ == self_capacity_; }
+bool StreamReassembler::empty() const { return output_.buffer_empty(); }
