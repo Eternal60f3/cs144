@@ -44,7 +44,7 @@ class TCPSender {
     size_t retransmission_timeout_;
     size_t first_unack_time_{0};
 
-    size_t peer_window_size_{0};
+    size_t peer_window_size_{2}; // 这个初始值用于第二次握手时，为给对方发syn和fin留位置
 
   public:
     //! Initialize a TCPSender

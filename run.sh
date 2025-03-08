@@ -7,4 +7,4 @@ fi
 cd build 
 cmake ..
 cmake --build . -j$(nproc)
-make check_lab3
+make check_lab4

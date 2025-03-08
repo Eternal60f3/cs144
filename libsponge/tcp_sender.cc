@@ -55,15 +55,25 @@ void TCPSender::fill_window() {
         segments_out_.push(seg);
     }
 
+    // 如果对方的window size为0，但是还有数据需要发送，那么就需要等待对方的window size变大, 此时如何获取到对方的window
+    // size变大的信息呢？这里的实现是等待对方的ack，然后更新对方的window size
+    // 是否需要考虑发送一个一字节的包进行试探？
 }
 
 //! \param ackno The remote receiver's ackno (acknowledgment number)
 //! \param window_size The remote receiver's advertised window size
 void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_size) {
-    ASSERT_D(has_sender_syn_, "SYN should sent when ack received");
+    // ASSERT_D(has_sender_syn_, "SYN should sent when ack received");
+    if (!has_sender_syn_) {
+        return;
+    }
+
+    uint64_t ackno_abs = unwrap(ackno, isn_, next_seqno_);
+    if (ackno_abs > next_seqno_) {
+        return;
+    }
 
     peer_window_size_ = window_size;
-    uint64_t ackno_abs = unwrap(ackno, isn_, next_seqno_);
 
     bool has_ack = false;
     while (!unack_segments_.empty()) {
@@ -87,6 +97,9 @@ void TCPSender::ack_received(const WrappingInt32 ackno, const uint16_t window_si
 
 //! \param[in] ms_since_last_tick the number of milliseconds since the last call to this method
 void TCPSender::tick(const size_t ms_since_last_tick) {
+    if (unack_segments_.empty()) {
+        return;
+    }
     first_unack_time_ += ms_since_last_tick;
     if (first_unack_time_ >= retransmission_timeout_) {
         consecutive_retransmission_cnt_++;
@@ -99,7 +112,10 @@ void TCPSender::tick(const size_t ms_since_last_tick) {
 unsigned int TCPSender::consecutive_retransmissions() const { return consecutive_retransmission_cnt_; }
 
 void TCPSender::send_empty_segment() {
-    ASSERT_D(has_sender_syn_, "SYN should sent when sending empty segment");
+    // ASSERT_D(has_sender_syn_, "SYN should sent when sending empty segment");
+    // if (!has_sender_syn_) {
+    //     return;
+    // }
     TCPSegment seg;
     seg.header().seqno = wrap(next_seqno_, isn_);
     segments_out_.push(seg);
